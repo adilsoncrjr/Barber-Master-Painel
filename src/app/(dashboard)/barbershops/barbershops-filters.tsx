@@ -23,11 +23,15 @@ function buildParams(
   return next;
 }
 
+function toURLSearchParams(sp: ReturnType<typeof useSearchParams>): URLSearchParams {
+  if (sp == null) return new URLSearchParams();
+  return new URLSearchParams(sp.toString());
+}
+
 export function BarbershopsFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const params: URLSearchParams =
-    searchParams != null ? new URLSearchParams(searchParams.toString()) : new URLSearchParams();
+  const params = toURLSearchParams(searchParams);
   const q = params.get("q") ?? "";
   const status = params.get("status") ?? "all";
   const plan = params.get("plan") ?? "all";

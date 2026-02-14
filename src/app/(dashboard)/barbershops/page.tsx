@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
 import { BarbershopsFilters } from "./barbershops-filters";
 import { BarbershopsTable } from "./barbershops-table";
@@ -40,7 +40,9 @@ export default async function BarbershopsPage({
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">Lista</CardTitle>
-          <BarbershopsFilters />
+          <Suspense fallback={<div className="h-10 animate-pulse rounded bg-muted" />}>
+            <BarbershopsFilters />
+          </Suspense>
         </CardHeader>
         <CardContent>
           <BarbershopsTable barbershops={barbershops} />
