@@ -43,3 +43,6 @@ npx prisma generate
 ```
 
 Depois rode o build de novo.
+
+---
+*Auth via Pages Router (/api/auth/login e logout). App Router auth removido para build na Vercel.*
