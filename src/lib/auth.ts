@@ -1,19 +1,32 @@
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "barber_master_session";
-const SESSION_MAX_AGE = Number(process.env.SESSION_MAX_AGE ?? 86400); // 24h
 
 export type SessionSuperAdmin = {
   id: string;
   email: string;
 };
 
+function getSessionConfig(): { cookieName: string; maxAge: number } {
+  return {
+    cookieName: process.env.SESSION_COOKIE_NAME ?? "barber_master_session",
+    maxAge: Number(process.env.SESSION_MAX_AGE ?? 86400),
+  };
+}
+
+function assertAuthEnv(): void {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("Auth: DATABASE_URL não está definida. Configure no .env ou nas variáveis de ambiente da Vercel.");
+  }
+}
+
 export async function getSession(): Promise<SessionSuperAdmin | null> {
+  assertAuthEnv();
+  const { cookieName } = getSessionConfig();
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const token = cookieStore.get(cookieName)?.value;
   if (!token) return null;
+  const prisma = getPrisma();
   const session = await prisma.superAdmin.findUnique({
     where: { id: token },
     select: { id: true, email: true },
@@ -21,8 +34,19 @@ export async function getSession(): Promise<SessionSuperAdmin | null> {
   return session;
 }
 
-export async function loginSuperAdmin(email: string, password: string): Promise<SessionSuperAdmin | null> {
-  const admin = await prisma.superAdmin.findUnique({ where: { email: email.trim().toLowerCase() } });
+export async function loginSuperAdmin(
+  email: string,
+  password: string
+): Promise<SessionSuperAdmin | null> {
+  assertAuthEnv();
+  console.error("AUTH ENV CHECK", {
+    hasDb: !!process.env.DATABASE_URL,
+    hasSecret: !!process.env.SESSION_SECRET,
+  });
+  const prisma = getPrisma();
+  const admin = await prisma.superAdmin.findUnique({
+    where: { email: email.trim().toLowerCase() },
+  });
   if (!admin) return null;
   const ok = await bcrypt.compare(password, admin.passwordHash);
   if (!ok) return null;
@@ -30,17 +54,19 @@ export async function loginSuperAdmin(email: string, password: string): Promise<
 }
 
 export async function setSessionCookie(adminId: string): Promise<void> {
+  const { cookieName, maxAge } = getSessionConfig();
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, adminId, {
+  cookieStore.set(cookieName, adminId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: SESSION_MAX_AGE,
+    maxAge,
     path: "/",
   });
 }
 
 export async function clearSessionCookie(): Promise<void> {
+  const { cookieName } = getSessionConfig();
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(cookieName);
 }
