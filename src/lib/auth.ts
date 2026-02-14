@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
+import cookie from "cookie";
 import { getPrisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+
+/** Resposta com setHeader (Pages Router NextApiResponse ou similar). */
+export type ResponseWithSetHeader = {
+  setHeader(name: string, value: string | string[]): unknown;
+};
 
 export type SessionSuperAdmin = {
   id: string;
@@ -65,8 +71,39 @@ export async function setSessionCookie(adminId: string): Promise<void> {
   });
 }
 
+/**
+ * Define o cookie de sessão na resposta (Pages Router).
+ * Use em pages/api/auth/login.ts para evitar import de next/headers no build.
+ */
+export function setSessionCookieApi(res: ResponseWithSetHeader, adminId: string): void {
+  const { cookieName, maxAge } = getSessionConfig();
+  const value = cookie.serialize(cookieName, adminId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge,
+    path: "/",
+  });
+  res.setHeader("Set-Cookie", value);
+}
+
 export async function clearSessionCookie(): Promise<void> {
   const { cookieName } = getSessionConfig();
   const cookieStore = await cookies();
   cookieStore.delete(cookieName);
+}
+
+/**
+ * Remove o cookie de sessão na resposta (Pages Router).
+ */
+export function clearSessionCookieApi(res: ResponseWithSetHeader): void {
+  const { cookieName } = getSessionConfig();
+  const value = cookie.serialize(cookieName, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+  res.setHeader("Set-Cookie", value);
 }

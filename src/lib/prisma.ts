@@ -42,10 +42,11 @@ export function getPrisma(): PrismaClient {
 
 /**
  * Acesso lazy: PrismaClient só é criado na primeira propriedade acessada.
- * Ex.: prisma.user.findMany() -> chama getPrisma() no primeiro acesso.
+ * Durante o build (NEXT_PHASE), qualquer acesso lança erro para evitar init.
  */
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop: string | symbol) {
+    assertRuntimeAllowed();
     const client = getPrisma() as unknown as Record<string | symbol, unknown>;
     return client[prop];
   },
