@@ -107,8 +107,8 @@ export async function POST(request: Request) {
       {
         error: "Erro ao criar barbearia.",
         details: message,
-        ...(code && { code }),
-        ...(meta && { meta }),
+        ...(code ? { code } : {}),
+        ...(meta && typeof meta === "object" ? { meta } : {}),
       },
       { status: 500 }
     );
