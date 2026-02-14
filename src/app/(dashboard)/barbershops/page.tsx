@@ -7,6 +7,8 @@ import { Plus, Search } from "lucide-react";
 import { BarbershopsFilters } from "./barbershops-filters";
 import { BarbershopsTable } from "./barbershops-table";
 
+export const dynamic = "force-dynamic";
+
 export default async function BarbershopsPage({
   searchParams,
 }: {

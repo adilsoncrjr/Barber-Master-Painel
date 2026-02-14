@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {

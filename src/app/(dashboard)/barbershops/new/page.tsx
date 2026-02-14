@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewBarbershopForm } from "./new-barbershop-form";
 
+export const dynamic = "force-dynamic";
+
 export default function NewBarbershopPage() {
   return (
     <div className="max-w-2xl space-y-6">
