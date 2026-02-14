@@ -26,7 +26,8 @@ function buildParams(
 export function BarbershopsFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const params = searchParams ?? new URLSearchParams();
+  const params: URLSearchParams =
+    searchParams != null ? new URLSearchParams(searchParams.toString()) : new URLSearchParams();
   const q = params.get("q") ?? "";
   const status = params.get("status") ?? "all";
   const plan = params.get("plan") ?? "all";
