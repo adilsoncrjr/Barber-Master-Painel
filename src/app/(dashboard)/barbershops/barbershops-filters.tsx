@@ -26,9 +26,10 @@ function buildParams(
 export function BarbershopsFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const q = searchParams.get("q") ?? "";
-  const status = searchParams.get("status") ?? "all";
-  const plan = searchParams.get("plan") ?? "all";
+  const params = searchParams ?? new URLSearchParams();
+  const q = params.get("q") ?? "";
+  const status = params.get("status") ?? "all";
+  const plan = params.get("plan") ?? "all";
 
   return (
     <form
@@ -39,7 +40,7 @@ export function BarbershopsFilters() {
         e.preventDefault();
         const form = e.currentTarget;
         const qVal = (form.querySelector('input[name="q"]') as HTMLInputElement)?.value ?? "";
-        router.push(`/barbershops?${buildParams(searchParams, { q: qVal || undefined }).toString()}`);
+        router.push(`/barbershops?${buildParams(params, { q: qVal || undefined }).toString()}`);
       }}
     >
       <input type="hidden" name="status" value={status === "all" ? "" : status} />
@@ -51,7 +52,7 @@ export function BarbershopsFilters() {
       <Select
         value={status}
         onValueChange={(v) =>
-          router.push(`/barbershops?${buildParams(searchParams, { status: v === "all" ? undefined : v }).toString()}`)
+          router.push(`/barbershops?${buildParams(params, { status: v === "all" ? undefined : v }).toString()}`)
         }
       >
         <SelectTrigger className="w-[140px]">
@@ -66,7 +67,7 @@ export function BarbershopsFilters() {
       <Select
         value={plan}
         onValueChange={(v) =>
-          router.push(`/barbershops?${buildParams(searchParams, { plan: v === "all" ? undefined : v }).toString()}`)
+          router.push(`/barbershops?${buildParams(params, { plan: v === "all" ? undefined : v }).toString()}`)
         }
       >
         <SelectTrigger className="w-[140px]">
