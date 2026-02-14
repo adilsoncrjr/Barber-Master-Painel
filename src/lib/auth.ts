@@ -45,10 +45,6 @@ export async function loginSuperAdmin(
   password: string
 ): Promise<SessionSuperAdmin | null> {
   assertAuthEnv();
-  console.error("AUTH ENV CHECK", {
-    hasDb: !!process.env.DATABASE_URL,
-    hasSecret: !!process.env.SESSION_SECRET,
-  });
   const prisma = getPrisma();
   const admin = await prisma.superAdmin.findUnique({
     where: { email: email.trim().toLowerCase() },
@@ -73,7 +69,7 @@ export async function setSessionCookie(adminId: string): Promise<void> {
 
 /**
  * Define o cookie de sessão na resposta (Pages Router).
- * Use em pages/api/auth/login.ts para evitar import de next/headers no build.
+ * Usado em pages/api/auth/login.ts para evitar import de next/headers no build.
  */
 export function setSessionCookieApi(res: ResponseWithSetHeader, adminId: string): void {
   const { cookieName, maxAge } = getSessionConfig();
