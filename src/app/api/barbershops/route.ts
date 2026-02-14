@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { slugFromName } from "@/lib/slug";
+export const revalidate = 0;
 
 /** Encontra um slug disponível: se o base já existir, tenta base-2, base-3, ... */
 async function findAvailableSlug(baseSlug: string): Promise<string> {
