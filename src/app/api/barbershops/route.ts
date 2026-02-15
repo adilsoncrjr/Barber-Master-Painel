@@ -1,24 +1,39 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { slugFromName } from "@/lib/slug";
+
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { barbershops, appUsers } from "@/shared/schema-saas";
+import { eq } from "drizzle-orm";
+
 export const revalidate = 0;
 
-/** Encontra um slug disponível: se o base já existir, tenta base-2, base-3, ... */
+// conexão drizzle
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+const db = drizzle(pool);
+
+// gerar slug único
 async function findAvailableSlug(baseSlug: string): Promise<string> {
   let slug = baseSlug;
   let n = 1;
+
   while (true) {
-    const existing = await prisma.barbershop.findUnique({ where: { slug } });
-    if (!existing) return slug;
-    n += 1;
+    const existing = await db
+      .select()
+      .from(barbershops)
+      .where(eq(barbershops.slug, slug))
+      .limit(1);
+
+    if (existing.length === 0) return slug;
+
+    n++;
     slug = `${baseSlug}-${n}`;
   }
-}
-
-function isPrismaError(e: unknown): e is { code?: string; meta?: unknown; message?: string } {
-  return typeof e === "object" && e !== null && "message" in e;
 }
 
 export async function POST(request: Request) {
@@ -29,89 +44,59 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    let slugInput = typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
+
+    const name = body.name?.trim();
+    let slugInput = body.slug?.trim()?.toLowerCase() || "";
     const status = body.status === "inactive" ? "inactive" : "active";
     const plan = ["trial", "start", "pro"].includes(body.plan) ? body.plan : "trial";
-    const adminName = typeof body.adminName === "string" ? body.adminName.trim() : "";
-    const adminPhone = typeof body.adminPhone === "string" ? body.adminPhone.trim().replace(/\D/g, "") : "";
-    const adminPassword = typeof body.adminPassword === "string" ? body.adminPassword : "";
 
-    if (!name) {
-      return NextResponse.json({ error: "Nome da barbearia é obrigatório." }, { status: 400 });
-    }
+    const adminName = body.adminName?.trim();
+    const adminPhone = body.adminPhone?.replace(/\D/g, "");
+    const adminPassword = body.adminPassword;
+
+    if (!name) return NextResponse.json({ error: "Nome obrigatório" }, { status: 400 });
+    if (!adminName) return NextResponse.json({ error: "Nome do admin obrigatório" }, { status: 400 });
+    if (!adminPhone) return NextResponse.json({ error: "Telefone admin obrigatório" }, { status: 400 });
+    if (!adminPassword || adminPassword.length < 6)
+      return NextResponse.json({ error: "Senha mínimo 6 caracteres" }, { status: 400 });
+
     const baseSlug = slugInput || slugFromName(name);
-    if (!baseSlug) {
-      return NextResponse.json({ error: "Não foi possível gerar um slug a partir do nome." }, { status: 400 });
-    }
-    if (!/^[a-z0-9-]+$/.test(baseSlug)) {
-      return NextResponse.json({ error: "Slug inválido. Use apenas letras minúsculas, números e hífens." }, { status: 400 });
-    }
-    if (!adminName) {
-      return NextResponse.json({ error: "Nome do admin é obrigatório." }, { status: 400 });
-    }
-    if (!adminPhone) {
-      return NextResponse.json({ error: "Telefone do admin é obrigatório." }, { status: 400 });
-    }
-    if (!adminPassword || adminPassword.length < 6) {
-      return NextResponse.json({ error: "Senha do admin deve ter no mínimo 6 caracteres." }, { status: 400 });
-    }
-
     const slug = await findAvailableSlug(baseSlug);
 
     const passwordHash = await hashPassword(adminPassword);
 
-    const barbershop = await prisma.barbershop.create({
-      data: {
+    // 1️⃣ cria barbearia
+    const [shop] = await db
+      .insert(barbershops)
+      .values({
         name,
         slug,
         status,
         plan,
-        users: {
-          create: {
-            role: "admin",
-            name: adminName,
-            phone: adminPhone,
-            passwordHash,
-            isActive: true,
-          },
-        },
-      },
+      })
+      .returning();
+
+    // 2️⃣ cria admin
+    await db.insert(appUsers).values({
+      barbershopId: shop.id,
+      name: adminName,
+      phone: adminPhone,
+      role: "admin",
+      passwordHash,
     });
 
     return NextResponse.json(
       {
-        id: barbershop.id,
-        name: barbershop.name,
-        slug: barbershop.slug,
-        status: barbershop.status,
-        plan: barbershop.plan,
-        createdAt: barbershop.createdAt,
+        id: shop.id,
+        name: shop.name,
+        slug: shop.slug,
+        status: shop.status,
+        plan: shop.plan,
       },
       { status: 201 }
     );
-  } catch (e) {
-    if (isPrismaError(e) && e.code === "P2002") {
-      return NextResponse.json(
-        { error: "Já existe uma barbearia com este slug.", code: e.code, target: e.meta },
-        { status: 409 }
-      );
-    }
-
-    const message = isPrismaError(e) ? e.message : e instanceof Error ? e.message : "Erro desconhecido";
-    const code = isPrismaError(e) ? e.code : undefined;
-    const meta = isPrismaError(e) ? e.meta : undefined;
-
-    console.error("[POST /api/barbershops]", { message, code, meta, error: e });
-
-    return NextResponse.json(
-      {
-        error: "Erro ao criar barbearia.",
-        details: message,
-        ...(code ? { code } : {}),
-        ...(meta && typeof meta === "object" ? { meta } : {}),
-      },
-      { status: 500 }
-    );
+  } catch (e: any) {
+    console.error("ERRO CRIAR BARBEARIA:", e);
+    return NextResponse.json({ error: "Erro ao criar barbearia" }, { status: 500 });
   }
 }
