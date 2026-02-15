@@ -1,102 +1,58 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { hashPassword } from "@/lib/password";
 import { slugFromName } from "@/lib/slug";
-
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { barbershops, appUsers } from "@/shared/schema-saas";
-import { eq } from "drizzle-orm";
 
 export const revalidate = 0;
 
-// conexão drizzle
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
-const db = drizzle(pool);
+const API_BASE_URL =
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.BACKEND_API_URL;
 
-// gerar slug único
-async function findAvailableSlug(baseSlug: string): Promise<string> {
-  let slug = baseSlug;
-  let n = 1;
-
-  while (true) {
-    const existing = await db
-      .select()
-      .from(barbershops)
-      .where(eq(barbershops.slug, slug))
-      .limit(1);
-
-    if (existing.length === 0) return slug;
-
-    n++;
-    slug = `${baseSlug}-${n}`;
-  }
+function jsonError(message: string, status = 500) {
+  return NextResponse.json({ error: message }, { status });
 }
 
 export async function POST(request: Request) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  if (!session) return jsonError("Não autorizado.", 401);
+
+  if (!API_BASE_URL) {
+    return jsonError("API_BASE_URL não configurado no painel.", 500);
   }
 
   try {
     const body = await request.json();
 
-    const name = body.name?.trim();
-    let slugInput = body.slug?.trim()?.toLowerCase() || "";
-    const status = body.status === "inactive" ? "inactive" : "active";
-    const plan = ["trial", "start", "pro"].includes(body.plan) ? body.plan : "trial";
+    const name = String(body?.name ?? "").trim();
+    const status = body?.status === "inactive" ? "inactive" : "active";
+    const plan = ["trial", "start", "pro"].includes(body?.plan) ? body.plan : "trial";
 
-    const adminName = body.adminName?.trim();
-    const adminPhone = body.adminPhone?.replace(/\D/g, "");
-    const adminPassword = body.adminPassword;
+    const adminName = String(body?.adminName ?? "").trim();
+    const adminPhone = String(body?.adminPhone ?? "").replace(/\D/g, "");
+    const adminPassword = String(body?.adminPassword ?? "");
 
-    if (!name) return NextResponse.json({ error: "Nome obrigatório" }, { status: 400 });
-    if (!adminName) return NextResponse.json({ error: "Nome do admin obrigatório" }, { status: 400 });
-    if (!adminPhone) return NextResponse.json({ error: "Telefone admin obrigatório" }, { status: 400 });
-    if (!adminPassword || adminPassword.length < 6)
-      return NextResponse.json({ error: "Senha mínimo 6 caracteres" }, { status: 400 });
+    if (!name) return jsonError("Nome obrigatório", 400);
+    if (!adminName) return jsonError("Nome do admin obrigatório", 400);
+    if (!adminPhone) return jsonError("Telefone admin obrigatório", 400);
+    if (!adminPassword || adminPassword.length < 6) return jsonError("Senha mínimo 6 caracteres", 400);
 
-    const baseSlug = slugInput || slugFromName(name);
-    const slug = await findAvailableSlug(baseSlug);
+    const slugInput = String(body?.slug ?? "").trim().toLowerCase();
+    const slug = slugInput || slugFromName(name);
 
-    const passwordHash = await hashPassword(adminPassword);
+    const payload = { ...body, name, slug, status, plan, adminName, adminPhone, adminPassword };
 
-    // 1️⃣ cria barbearia
-    const [shop] = await db
-      .insert(barbershops)
-      .values({
-        name,
-        slug,
-        status,
-        plan,
-      })
-      .returning();
-
-    // 2️⃣ cria admin
-    await db.insert(appUsers).values({
-      barbershopId: shop.id,
-      name: adminName,
-      phone: adminPhone,
-      role: "admin",
-      passwordHash,
+    const upstream = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/api/barbershops`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store",
     });
 
-    return NextResponse.json(
-      {
-        id: shop.id,
-        name: shop.name,
-        slug: shop.slug,
-        status: shop.status,
-        plan: shop.plan,
-      },
-      { status: 201 }
-    );
-  } catch (e: any) {
-    console.error("ERRO CRIAR BARBEARIA:", e);
-    return NextResponse.json({ error: "Erro ao criar barbearia" }, { status: 500 });
+    const data = await upstream.json().catch(() => ({}));
+    return NextResponse.json(data, { status: upstream.status });
+  } catch (e) {
+    console.error("POST /api/barbershops (panel proxy) failed:", e);
+    return jsonError("Erro ao criar barbearia", 500);
   }
 }
