@@ -44,7 +44,10 @@ export async function POST(request: Request) {
 
     const upstream = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/api/barbershops`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-key": process.env.INTERNAL_API_KEY ?? "",
+      },
       body: JSON.stringify(payload),
       cache: "no-store",
     });
