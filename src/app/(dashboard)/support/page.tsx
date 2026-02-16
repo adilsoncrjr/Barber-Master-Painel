@@ -36,7 +36,7 @@ export default async function SupportPage({
     where.barbershop = { name: { contains: q.trim(), mode: "insensitive" } };
   }
 
-  let tickets;
+  let tickets: any[] = [];
   let error: string | null = null;
 
   try {
