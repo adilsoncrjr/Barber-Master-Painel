@@ -150,24 +150,24 @@ export default async function ReportsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard
-          title="Barbearias ativas"
+          heading="Barbearias ativas"
           value={kpis?.activeBarbershops ?? 0}
         />
         <StatCard
-          title="Novas no mês"
+          heading="Novas no mês"
           value={kpis?.newThisMonth ?? 0}
         />
         <StatCard
-          title="Canceladas no mês"
+          heading="Canceladas no mês"
           value={kpis?.cancelledThisMonth ?? 0}
         />
         <StatCard
-          title="Churn rate (%)"
+          heading="Churn rate (%)"
           value={`${kpis?.churnRate ?? "0"}%`}
           hint="Canceladas / ativas no início do mês"
         />
         <StatCard
-          title={
+          heading={
             <span
               className="cursor-help"
               title="MRR = somatório das faturas pagas no mês corrente"

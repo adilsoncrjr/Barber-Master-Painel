@@ -24,12 +24,12 @@ export default async function DashboardPage() {
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          title="Barbearias ativas"
+          heading="Barbearias ativas"
           value={activeBarbershops}
           hint="Status: ativo"
         />
         <StatCard
-          title="Total de barbearias"
+          heading="Total de barbearias"
           value={totalBarbershops}
           hint="Excluindo deletadas"
         />

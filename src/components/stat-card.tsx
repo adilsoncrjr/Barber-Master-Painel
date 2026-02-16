@@ -1,11 +1,11 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  heading: React.ReactNode;   // ← alterado de title para heading
+type StatCardProps = Omit<React.HTMLAttributes<HTMLDivElement>, "title"> & {
+  heading: React.ReactNode;
   value: string | number;
-  hint?: string;
-}
+  hint?: React.ReactNode;
+};
 
 export function StatCard({
   heading,
@@ -23,16 +23,8 @@ export function StatCard({
       {...props}
     >
       <div className="text-sm text-muted-foreground">{heading}</div>
-
-      <div className="mt-2 text-2xl font-bold tracking-tight">
-        {value}
-      </div>
-
-      {hint && (
-        <div className="mt-1 text-xs text-muted-foreground">
-          {hint}
-        </div>
-      )}
+      <div className="mt-2 text-2xl font-bold tracking-tight">{value}</div>
+      {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
     </div>
   );
 }

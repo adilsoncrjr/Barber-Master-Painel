@@ -187,7 +187,7 @@ export default async function BillingPage({
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title={
+          heading={
             <span
               className="cursor-help"
               title="MRR = somatório das faturas pagas no mês corrente (definição prática)"
@@ -199,17 +199,17 @@ export default async function BillingPage({
           hint="Soma das faturas pagas no mês"
         />
         <StatCard
-          title="Receita do mês"
+          heading="Receita do mês"
           value={formatCurrency(kpis.monthRevenue)}
           hint="Faturas pagas no mês"
         />
         <StatCard
-          title="Inadimplência total"
+          heading="Inadimplência total"
           value={formatCurrency(kpis.overdueTotal)}
           hint="Faturas vencidas"
         />
         <StatCard
-          title="Pagamentos (mês)"
+          heading="Pagamentos (mês)"
           value={`${kpis.monthPaymentsCount} (${formatCurrency(kpis.monthPaymentsAmount)})`}
           hint="Transações recebidas"
         />
