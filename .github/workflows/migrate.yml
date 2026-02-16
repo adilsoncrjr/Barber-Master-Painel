@@ -6,18 +6,44 @@ on:
 jobs:
   migrate:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      - run: npm ci
+      - name: Install deps
+        run: npm ci
 
-      - name: Prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      # 🔍 DEBUG — mostra se secrets chegaram (sem mostrar senha)
+      - name: Check env vars
+        run: |
+          echo "DATABASE_URL length:"
+          echo ${#DATABASE_URL}
+          echo "DIRECT_URL length:"
+          echo ${#DIRECT_URL}
+
+      # 🚨 se estiver vazio ele para aqui
+      - name: Validate secrets
+        run: |
+          if [ -z "$DIRECT_URL" ]; then
+            echo "❌ DIRECT_URL vazio no GitHub Secrets"
+            exit 1
+          fi
+          if [ -z "$DATABASE_URL" ]; then
+            echo "❌ DATABASE_URL vazio no GitHub Secrets"
+            exit 1
+          fi
+          echo "✅ Secrets carregados"
+
+      - name: Run Prisma migrate
         run: npx prisma migrate deploy
