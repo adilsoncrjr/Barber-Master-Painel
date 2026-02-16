@@ -1,46 +1,36 @@
-import * as React from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 
 interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: React.ReactNode;
+  heading: React.ReactNode;   // ← alterado de title para heading
   value: string | number;
   hint?: string;
-  trend?: { value: string; positive: boolean };
 }
 
 export function StatCard({
-  title,
+  heading,
   value,
   hint,
-  trend,
   className,
   ...props
 }: StatCardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border bg-card p-5 shadow-[var(--shadow-card)] transition-colors hover:shadow-[var(--shadow-md)]",
+        "rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md",
         className
       )}
       {...props}
     >
-      <p className="text-muted-foreground text-sm font-medium">{title}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">
+      <div className="text-sm text-muted-foreground">{heading}</div>
+
+      <div className="mt-2 text-2xl font-bold tracking-tight">
         {value}
-      </p>
-      {(hint || trend) && (
-        <div className="mt-2 flex items-center gap-2 text-xs">
-          {hint && <span className="text-muted-foreground">{hint}</span>}
-          {trend && (
-            <span
-              className={cn(
-                "font-medium",
-                trend.positive ? "text-emerald-600" : "text-red-600"
-              )}
-            >
-              {trend.value}
-            </span>
-          )}
+      </div>
+
+      {hint && (
+        <div className="mt-1 text-xs text-muted-foreground">
+          {hint}
         </div>
       )}
     </div>
