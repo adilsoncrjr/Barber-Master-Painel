@@ -1,8 +1,11 @@
+
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { slugFromName } from "@/lib/slug";
 
 export const revalidate = 0;
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const API_BASE_URL =
   process.env.API_BASE_URL ||
