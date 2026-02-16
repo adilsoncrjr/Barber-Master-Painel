@@ -16,7 +16,7 @@ function jsonSafe<T>(data: T): T {
 
 export async function PATCH(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSession();
@@ -24,13 +24,13 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: "ID inválido." }, { status: 400 });
     }
 
-    const barbershop = await prisma.barbershop.findUnique({
-      where: { id },
+    const barbershop = await prisma.barbershop.findFirst({
+      where: { id, deletedAt: null },
       select: { status: true },
     });
 

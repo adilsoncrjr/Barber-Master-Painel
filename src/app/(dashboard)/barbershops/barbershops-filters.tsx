@@ -67,6 +67,8 @@ export function BarbershopsFilters() {
           <SelectItem value="all">Todos status</SelectItem>
           <SelectItem value="active">Ativo</SelectItem>
           <SelectItem value="inactive">Inativo</SelectItem>
+          <SelectItem value="suspended">Suspenso</SelectItem>
+          <SelectItem value="cancelled">Cancelado</SelectItem>
         </SelectContent>
       </Select>
       <Select
@@ -80,9 +82,12 @@ export function BarbershopsFilters() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos planos</SelectItem>
+          <SelectItem value="free">Free</SelectItem>
           <SelectItem value="trial">Trial</SelectItem>
+          <SelectItem value="basic">Basic</SelectItem>
           <SelectItem value="start">Start</SelectItem>
           <SelectItem value="pro">Pro</SelectItem>
+          <SelectItem value="enterprise">Enterprise</SelectItem>
         </SelectContent>
       </Select>
       <Button type="submit" variant="secondary">

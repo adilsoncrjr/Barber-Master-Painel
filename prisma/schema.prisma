@@ -17,18 +17,91 @@ model SuperAdmin {
   @@map("super_admins")
 }
 
+model Ticket {
+  id             String    @id @default(uuid())
+  barbershopId   String    @map("barbershop_id")
+  barbershop     Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  subject        String
+  status         String    // open | in_progress | waiting_customer | closed
+  priority       String    // low | medium | high | urgent
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  messages       TicketMessage[]
+
+  @@index([barbershopId])
+  @@index([status])
+  @@index([priority])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id             String    @id @default(uuid())
+  ticketId       String    @map("ticket_id")
+  ticket         Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorType     String    // HUB | SHOP
+  message        String    @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([ticketId])
+  @@map("ticket_messages")
+}
+
 model Barbershop {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  status    String   @default("active")  // active | inactive
-  plan      String   @default("trial")   // trial | start | pro
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  name           String
+  slug           String    @unique
+  status         String    @default("active")   // active | inactive | suspended | cancelled
+  plan           String    @default("trial")    // trial | start | pro | free | basic | pro | enterprise
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  lastBillingAt  DateTime? @map("last_billing_at")
+  totalBilled    Decimal?  @default(0) @db.Decimal(12, 2) @map("total_billed")
+  internalNotes  String?   @map("internal_notes")
+  deletedAt      DateTime? @map("deleted_at")
 
   users     User[]
+  invoices  Invoice[]
+  payments  Payment[]
+  tickets   Ticket[]
 
   @@map("barbershops")
+}
+
+model Invoice {
+  id             String    @id @default(uuid())
+  barbershopId   String    @map("barbershop_id")
+  barbershop     Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  amount         Decimal   @db.Decimal(12, 2)
+  status         String    // open | paid | overdue | canceled
+  dueDate        DateTime  @map("due_date")
+  paidAt         DateTime? @map("paid_at")
+  periodStart    DateTime  @map("period_start")
+  periodEnd      DateTime  @map("period_end")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  payments       Payment[]
+
+  @@index([barbershopId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model Payment {
+  id             String    @id @default(uuid())
+  barbershopId   String    @map("barbershop_id")
+  barbershop     Barbershop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  invoiceId      String?   @map("invoice_id")
+  invoice        Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  amount         Decimal   @db.Decimal(12, 2)
+  method         String    // pix | card | boleto | manual
+  status         String    // pending | completed | failed
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([barbershopId])
+  @@index([invoiceId])
+  @@map("payments")
 }
 
 model User {
