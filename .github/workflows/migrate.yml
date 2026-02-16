@@ -45,5 +45,5 @@ jobs:
           fi
           echo "✅ Secrets carregados"
 
-      - name: Baseline first migration
-        run: npx prisma migrate resolve --applied 20250216000000_add_invoices_and_payments
+      - name: Run Prisma migrate
+        run: npx prisma migrate deploy
