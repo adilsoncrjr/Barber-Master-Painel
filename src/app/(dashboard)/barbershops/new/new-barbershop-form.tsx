@@ -14,10 +14,13 @@ import {
 } from "@/components/ui/select";
 import { slugFromName } from "@/lib/slug";
 
+const SUCCESS_MESSAGE_DURATION_MS = 2000;
+
 export function NewBarbershopForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
@@ -55,8 +58,24 @@ export function NewBarbershopForm() {
       setError(msg);
       return;
     }
-    router.push(`/barbershops/${data.id}`);
-    router.refresh();
+    setSuccess(true);
+    setError(null);
+    window.setTimeout(() => {
+      router.push("/barbershops");
+      router.refresh();
+    }, SUCCESS_MESSAGE_DURATION_MS);
+  }
+
+  if (success) {
+    return (
+      <div
+        className="rounded-lg border border-green-200 bg-green-50 p-4 text-center text-green-800"
+        role="alert"
+      >
+        <p className="font-semibold">BARBEARIA CRIADA COM SUCESSO</p>
+        <p className="mt-1 text-sm">Redirecionando para a listagem…</p>
+      </div>
+    );
   }
 
   return (
