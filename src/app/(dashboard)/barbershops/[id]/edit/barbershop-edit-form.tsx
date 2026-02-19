@@ -115,7 +115,7 @@ export function BarbershopEditForm({ barbershopId, initial }: Props) {
             defaultValue={initial.slug}
             required
             placeholder="barbearia-do-joao"
-            pattern="[a-z0-9-]+"
+            pattern="[-a-z0-9]+"
             title="Apenas letras minúsculas, números e hífens"
           />
         </div>
