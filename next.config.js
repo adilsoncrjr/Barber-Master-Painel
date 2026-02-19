@@ -1,14 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    const apiBase = process.env.API_BASE_URL || "https://barber-master-hub.onrender.com";
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${apiBase.replace(/\/$/, "")}/api/:path*`,
-      },
-    ];
-  },
+  // Sem rewrite global de /api: as rotas do painel (barbershops, billing, etc.)
+  // ficam em src/app/api/ e precisam ser atendidas pelo próprio Next.js.
+  // O POST /api/barbershops já faz proxy para o backend em route.ts.
 };
 
 module.exports = nextConfig;
