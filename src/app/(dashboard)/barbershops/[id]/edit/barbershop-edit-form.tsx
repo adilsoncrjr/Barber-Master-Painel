@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { PLAN_OPTIONS, PLAN_VALUES, type PlanValue } from "@/lib/plans";
 
+type Plan = "basico" | "pro" | "master";
+
 const STATUS_OPTIONS = [
   { value: "active", label: "Ativo" },
   { value: "inactive", label: "Inativo" },
@@ -37,9 +39,15 @@ export function BarbershopEditForm({ barbershopId, initial }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(initial.status);
-  const [plan, setPlan] = useState<PlanValue>(
-    PLAN_VALUES.includes(initial.plan as PlanValue) ? (initial.plan as PlanValue) : "basico"
+  const [plan, setPlan] = useState<Plan>(
+    PLAN_VALUES.includes(initial.plan as PlanValue) ? (initial.plan as Plan) : "basico"
   );
+
+  const handlePlanChange = (value: string) => {
+    if (value === "basico" || value === "pro" || value === "master") {
+      setPlan(value);
+    }
+  };
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -130,7 +138,7 @@ export function BarbershopEditForm({ barbershopId, initial }: Props) {
         </div>
         <div className="space-y-2">
           <Label>Plano</Label>
-          <Select value={plan} onValueChange={setPlan}>
+          <Select value={plan} onValueChange={handlePlanChange}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
