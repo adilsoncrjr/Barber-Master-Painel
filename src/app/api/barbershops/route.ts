@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     const name = String(body?.name ?? "").trim();
     const status = body?.status === "inactive" ? "inactive" : "active";
-    const plan = ["trial", "start", "pro"].includes(body?.plan) ? body.plan : "trial";
+    const plan = ["basico", "pro", "master"].includes(body?.plan) ? body.plan : "basico";
 
     const adminName = String(body?.adminName ?? "").trim();
     const adminPhone = String(body?.adminPhone ?? "").replace(/\D/g, "");

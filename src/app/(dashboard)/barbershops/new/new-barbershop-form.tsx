@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { slugFromName } from "@/lib/slug";
+import { PLAN_OPTIONS, type PlanValue } from "@/lib/plans";
 
 const SUCCESS_MESSAGE_DURATION_MS = 2000;
 
@@ -24,7 +25,7 @@ export function NewBarbershopForm() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
-  const [plan, setPlan] = useState<"trial" | "start" | "pro">("trial");
+  const [plan, setPlan] = useState<PlanValue>("basico");
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
@@ -121,14 +122,16 @@ export function NewBarbershopForm() {
           </div>
           <div className="space-y-2">
             <Label>Plano</Label>
-            <Select value={plan} onValueChange={(v) => setPlan(v as "trial" | "start" | "pro")}>
+            <Select value={plan} onValueChange={(v) => setPlan(v as PlanValue)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="trial">Trial</SelectItem>
-                <SelectItem value="start">Start</SelectItem>
-                <SelectItem value="pro">Pro</SelectItem>
+                {PLAN_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

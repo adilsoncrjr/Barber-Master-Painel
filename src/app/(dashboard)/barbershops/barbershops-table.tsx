@@ -11,6 +11,7 @@ import {
   DataTableCell,
 } from "@/components/data-table";
 import { BarbershopRowActions } from "./barbershop-row-actions";
+import { getPlanLabel } from "@/lib/plans";
 import { Store, Plus } from "lucide-react";
 
 type BarbershopWithCount = Barbershop & { _count: { users: number } };
@@ -85,7 +86,7 @@ export function BarbershopsTable({ barbershops }: { barbershops: BarbershopWithU
                     {STATUS_LABEL[b.status] ?? b.status}
                   </Badge>
                 </td>
-                <td className="p-4 capitalize">{b.plan}</td>
+                <td className="p-4">{getPlanLabel(b.plan)}</td>
                 <td className="p-4 text-muted-foreground">
                   {b.lastBillingAt
                     ? new Date(String(b.lastBillingAt)).toLocaleDateString("pt-BR")

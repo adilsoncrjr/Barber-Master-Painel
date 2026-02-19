@@ -48,17 +48,20 @@ model TicketMessage {
 }
 
 model Barbershop {
-  id             String    @id @default(uuid())
-  name           String
-  slug           String    @unique
-  status         String    @default("active")   // active | inactive | suspended | cancelled
-  plan           String    @default("trial")    // trial | start | pro | free | basic | pro | enterprise
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  lastBillingAt  DateTime? @map("last_billing_at")
-  totalBilled    Decimal?  @default(0) @db.Decimal(12, 2) @map("total_billed")
-  internalNotes  String?   @map("internal_notes")
-  deletedAt      DateTime? @map("deleted_at")
+  id                  String    @id @default(uuid())
+  name                String
+  slug                String    @unique
+  status              String    @default("active")   // active | inactive | suspended | cancelled
+  plan                String    @default("basico")  // basico | pro | master
+  aiCreditsTotal      Int       @default(0) @map("ai_credits_total")
+  aiCreditsBalance    Int       @default(0) @map("ai_credits_balance")
+  aiCreditsResetAt    DateTime? @map("ai_credits_reset_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  lastBillingAt       DateTime? @map("last_billing_at")
+  totalBilled         Decimal?  @default(0) @db.Decimal(12, 2) @map("total_billed")
+  internalNotes       String?   @map("internal_notes")
+  deletedAt           DateTime? @map("deleted_at")
 
   users     User[]
   invoices  Invoice[]

@@ -25,7 +25,7 @@ export default async function BarbershopsPage({
   } = { deletedAt: null };
   if (q?.trim()) where.name = { contains: q.trim(), mode: "insensitive" };
   if (status && ["active", "inactive", "suspended", "cancelled"].includes(status)) where.status = status;
-  if (plan && ["free", "trial", "basic", "start", "pro", "enterprise"].includes(plan)) where.plan = plan;
+  if (plan && ["basico", "pro", "master"].includes(plan)) where.plan = plan;
 
   const list = await prisma.barbershop.findMany({
     where,

@@ -12,21 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PLAN_OPTIONS, PLAN_VALUES, type PlanValue } from "@/lib/plans";
 
 const STATUS_OPTIONS = [
   { value: "active", label: "Ativo" },
   { value: "inactive", label: "Inativo" },
   { value: "suspended", label: "Suspenso" },
   { value: "cancelled", label: "Cancelado" },
-];
-
-const PLAN_OPTIONS = [
-  { value: "free", label: "Free" },
-  { value: "trial", label: "Trial" },
-  { value: "basic", label: "Basic" },
-  { value: "start", label: "Start" },
-  { value: "pro", label: "Pro" },
-  { value: "enterprise", label: "Enterprise" },
 ];
 
 type Props = {
@@ -45,7 +37,9 @@ export function BarbershopEditForm({ barbershopId, initial }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(initial.status);
-  const [plan, setPlan] = useState(initial.plan);
+  const [plan, setPlan] = useState<PlanValue>(
+    PLAN_VALUES.includes(initial.plan as PlanValue) ? (initial.plan as PlanValue) : "basico"
+  );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

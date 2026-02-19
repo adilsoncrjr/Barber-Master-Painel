@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { PLAN_VALUES, getCreditsForPlan, type PlanValue } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
 const STATUS_VALUES = ["active", "inactive", "suspended", "cancelled"] as const;
-const PLAN_VALUES = ["free", "trial", "basic", "start", "pro", "enterprise"] as const;
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
@@ -64,6 +64,9 @@ export async function PATCH(
     slug?: string;
     status?: string;
     plan?: string;
+    aiCreditsTotal?: number;
+    aiCreditsBalance?: number;
+    aiCreditsResetAt?: Date | null;
     internalNotes?: string | null;
     deletedAt?: Date | null;
     lastBillingAt?: Date | null;
@@ -82,8 +85,13 @@ export async function PATCH(
   }
   if (typeof body.status === "string" && STATUS_VALUES.includes(body.status as any))
     updates.status = body.status;
-  if (typeof body.plan === "string" && PLAN_VALUES.includes(body.plan as any))
+  if (typeof body.plan === "string" && PLAN_VALUES.includes(body.plan as PlanValue)) {
     updates.plan = body.plan;
+    const credits = getCreditsForPlan(body.plan as PlanValue);
+    updates.aiCreditsTotal = credits.aiCreditsTotal;
+    updates.aiCreditsBalance = credits.aiCreditsBalance;
+    updates.aiCreditsResetAt = credits.aiCreditsResetAt;
+  }
   if ("internalNotes" in body)
     updates.internalNotes = typeof body.internalNotes === "string" ? body.internalNotes : null;
   if (body.softDelete === true) updates.deletedAt = new Date();

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PLAN_OPTIONS } from "@/lib/plans";
 
 function buildParams(
   current: URLSearchParams,
@@ -82,12 +83,11 @@ export function BarbershopsFilters() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos planos</SelectItem>
-          <SelectItem value="free">Free</SelectItem>
-          <SelectItem value="trial">Trial</SelectItem>
-          <SelectItem value="basic">Basic</SelectItem>
-          <SelectItem value="start">Start</SelectItem>
-          <SelectItem value="pro">Pro</SelectItem>
-          <SelectItem value="enterprise">Enterprise</SelectItem>
+          {PLAN_OPTIONS.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Button type="submit" variant="secondary">

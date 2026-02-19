@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getPlanLabel } from "@/lib/plans";
 import { prisma } from "@/lib/prisma";
 import { getTenantUrl } from "@/lib/tenant-link";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ export default async function BarbershopDetailPage({
     <div className="space-y-8">
       <PageHeader
         title={barbershop.name}
-        description={`Slug: ${barbershop.slug} • ${barbershop.plan}`}
+        description={`Slug: ${barbershop.slug} • ${getPlanLabel(barbershop.plan)}`}
         actions={
           <Button variant="ghost" size="icon" asChild>
             <Link href="/barbershops" aria-label="Voltar">
@@ -88,7 +89,7 @@ export default async function BarbershopDetailPage({
 
             <p>
               <span className="text-muted-foreground">Plano:</span>{" "}
-              {barbershop.plan}
+              {getPlanLabel(barbershop.plan)}
             </p>
 
             {barbershop.lastBillingAt && (

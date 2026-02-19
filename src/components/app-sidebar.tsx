@@ -21,11 +21,22 @@ const navItems = [
   { href: "/reports", label: "Relatórios SaaS", icon: BarChart2 },
 ];
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+};
+
+export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps = {}) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-30 flex h-screen w-56 flex-col border-r border-border/60 bg-card shadow-[var(--shadow-md)]">
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-30 flex h-screen w-56 flex-col border-r border-border/60 bg-card shadow-[var(--shadow-md)] transition-transform duration-200 ease-out lg:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+      aria-hidden={!mobileOpen}
+    >
       <div className="flex h-14 shrink-0 items-center border-b px-5">
         <Link
           href="/dashboard"
@@ -47,6 +58,7 @@ export function AppSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
                 isActive
