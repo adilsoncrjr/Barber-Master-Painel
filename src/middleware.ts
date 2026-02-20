@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/", "/checkout", "/areadocliente", "/app"];
 
 export function middleware(request: NextRequest) {
   const sessionCookieName = process.env.SESSION_COOKIE_NAME ?? "barber_master_session";
