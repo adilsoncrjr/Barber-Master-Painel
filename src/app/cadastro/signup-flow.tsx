@@ -49,7 +49,7 @@ export function SignupFlow() {
   const [plan, setPlan] = useState<PlanValue>("basico");
 
   useEffect(() => {
-    const p = searchParams.get("plano");
+    const p = searchParams?.get("plano");
     if (p && ["basico", "pro", "master"].includes(p)) setPlan(p as PlanValue);
   }, [searchParams]);
 
