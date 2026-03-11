@@ -18,6 +18,17 @@ export function getPlanLabel(plan: string): string {
   return PLAN_LABELS[plan as PlanValue] ?? plan;
 }
 
+/** Preços mensais exibidos na landing (em R$). */
+export const PLAN_PRICES: Record<PlanValue, number> = {
+  basico: 97,
+  pro: 197,
+  master: 397,
+};
+
+export function getPlanPrice(plan: string): number {
+  return PLAN_PRICES[plan as PlanValue] ?? 0;
+}
+
 /** Créditos de IA e data de reset conforme o plano. */
 export function getCreditsForPlan(plan: PlanValue): {
   aiCreditsTotal: number;
