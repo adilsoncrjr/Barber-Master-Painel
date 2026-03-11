@@ -1,8 +1,7 @@
-import type { ElementType } from "react";
 import { Calendar, Users, CreditCard, BarChart3, Sparkles, Clock } from "lucide-react";
 import { landingContent } from "./landing-content";
 
-const featureIconMap: Record<string, ElementType> = {
+const featureIconMap = {
   agenda: Calendar,
   clients: Users,
   plans: CreditCard,
