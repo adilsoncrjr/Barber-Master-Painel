@@ -7,7 +7,7 @@ const featureIconMap = {
   plans: CreditCard,
   reports: BarChart3,
   automations: Sparkles,
-  no-shows: Clock,
+  "no-shows": Clock,
 };
 
 export function FeaturesGridSection() {
